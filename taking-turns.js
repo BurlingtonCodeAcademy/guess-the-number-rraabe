@@ -1,21 +1,3 @@
-//To do: make a function for yes/no answers that checks the input and asks again if it doesn't understand
-//To do: make a function for h/l answers that checks the input and asks again if it doesn't understand
-//Add do while loops
-//Other: Are there places I could use a ternary operator instead of an if statement? (true ? iftrue : iffalse)
-/**********Boiler Plate Begin ************/
-const readline = require("readline");
-const readlineInterface = readline.createInterface(
-  process.stdin,
-  process.stdout
-);
-
-function ask(questionText) {
-  return new Promise((resolve, reject) => {
-    readlineInterface.question(questionText, resolve);
-  });
-}
-/**********Boiler Plate End ************/
-
 //Variables shared between games
 let nextPlayer = null;
 let playAgain = null;
@@ -30,6 +12,20 @@ let yesNo;
 let guess;
 let highLow;
 
+/**********Boiler Plate Begin ************/
+const readline = require("readline");
+const readlineInterface = readline.createInterface(
+  process.stdin,
+  process.stdout
+);
+
+function ask(questionText) {
+  return new Promise((resolve, reject) => {
+    readlineInterface.question(questionText, resolve);
+  });
+}
+/**********Boiler Plate End ************/
+
 //This function gets an input from the user, checks to make sure its an number and stores it as an int
 async function getNumber() {
   let inputNumber;
@@ -42,7 +38,7 @@ async function getNumber() {
   } while (isNaN(inputNumber));
   return inputNumber;
 }
-
+//Takes a string input until it gets either a y or n answer.
 async function getYesNo() {
   let answer;
   do {
@@ -54,7 +50,7 @@ async function getYesNo() {
   } while (!(answer === 'y' || answer === 'n'));
   return answer;
 }
-
+//Takes a string input until it gets either a h or l answer.
 async function getHighLow() {
   let hOrL;
   do {
@@ -73,40 +69,7 @@ function randomInteger(min, max) {
   return min + Math.floor(Math.random() * range);
 }
 
-//Text and data for the end of the game
-function endGame() {
-  let averageComputerGuesses = totalComputerTries / totalComputerWins;
-  let averageUserGuesses = totalUserTries / totalUserWins;
-
-  console.log(`\nNumber of games that I guessed correctly: ${totalComputerWins}`);
-  console.log(`My average number of guesses: ${averageComputerGuesses}`);
-
-  console.log(`\nNumber of games that you guessed correctly: ${totalUserWins}`);
-  console.log(`Your average number of guesses: ${averageUserGuesses || 0}`);
-
-  if (averageComputerGuesses > averageUserGuesses) {
-    console.log("\nYou were better at guessing! Great job!");
-  } else if (averageComputerGuesses < averageUserGuesses) {
-    console.log("\nI was better at guessing this time. Better luck next time.");
-  } else {
-    console.log("\nWe were evenly matched! Well played!");
-  }
-  console.log("\nIt was nice playing with you. Goodbye.");
-  process.exit();
-}
-
-//This function asks the user if they want to keep playing and, if so, checks who guesses next
-async function nextGame() {
-  console.log("\nDo you want to play again? (Y/N): ")
-  playAgain = await getYesNo();
-  if (playAgain==="y") {
-    nextPlayer === "user" ? userGuesses() : computerGuesses();
-  } else {
-    //assumes no
-    endGame();
-  }
-}
-
+//Checks for all cheating conditions
 function cheatDetector(guess, lastGuess, allGuesses){
   if(yesNo.toLowerCase().startsWith("y")){
     if (lastGuess != secretNumber) {
@@ -136,15 +99,15 @@ async function computerGuesses() {
   let lastGuess = null;
 
   console.log("Let's play a game where you (human) make up a number and I (computer) try to guess it.");
-
+  
   //Get the min value as an int
   console.log("Please enter the lower limit: ");
   minNumber = await getNumber();
-
+  
   //Get the max value as an int
   console.log("Please enter the upper limit: ");
   maxNumber = await getNumber();
-
+  
   //Get the secret number but make sure it's between the min and max
   console.log("What is your secret number?\nI won't peek, I promise...");
   secretNumber = await getNumber();
@@ -154,17 +117,17 @@ async function computerGuesses() {
   }
 
   console.log(`You entered: ${secretNumber}`);
-
+  
   guess = Math.floor((maxNumber + minNumber) / 2); //The first guess should be in the middle of the range
-
+  
   while (!gotIt) {
     if (
       !allGuesses.includes(guess) &&
       guess <= maxNumber &&
       guess >= minNumber &&
       lastGuess != secretNumber
-    ) {
-      console.log(`Is your number ${guess}? (Y/N)`);
+      ) {
+        console.log(`Is your number ${guess}? (Y/N)`);
       yesNo = await getYesNo();
       allGuesses.push(guess);
       lastGuess = guess;
@@ -175,15 +138,15 @@ async function computerGuesses() {
         console.log(`Number of guesses: ${tries}`);
         console.log(`My guesses were: ${allGuesses}`);
       } else { //yesNo can only be 'y' or 'n' so this else covers 'n'
-        tries++;
-        console.log("Is it higher (H), or lower (L)?");
-        highLow = await getHighLow();
-        if (highLow === "h") {
-          minNumber = guess;
-          guess = guess + Math.ceil((maxNumber - minNumber) / 2);
-          lastHighLow = "higher";
-        } else { //highLow can only be 'h' or 'l' so this covers 'l'
-          maxNumber = guess;
+      tries++;
+      console.log("Is it higher (H), or lower (L)?");
+      highLow = await getHighLow();
+      if (highLow === "h") {
+        minNumber = guess;
+        guess = guess + Math.ceil((maxNumber - minNumber) / 2);
+        lastHighLow = "higher";
+      } else { //highLow can only be 'h' or 'l' so this covers 'l'
+      maxNumber = guess;
           guess = guess - Math.ceil((maxNumber - minNumber) / 2);
           lastHighLow = "lower";
         }
@@ -202,20 +165,20 @@ async function userGuesses() {
   let userGuesses = [];
   let tries = 1;
   console.log("\nTell me the range you want and I'll pick a number.\n");
-
+  
   //Get the min value as an int
   console.log("Please enter the lower limit: ");
   minNumber = await getNumber();
-
+  
   //Get the max value as an int
   console.log("Please enter the upper limit: ");
   maxNumber = await getNumber();
-
+  
   let secretNumber = randomInteger(minNumber, maxNumber);
   console.log("My secret number is: " + secretNumber);
   //Start guessing
   let guess = await ask("What's your guess? ");
-
+  
   while (true) {
     userGuesses.push(guess);
     if (guess < secretNumber) {
@@ -236,6 +199,39 @@ async function userGuesses() {
   totalUserWins++;
   nextPlayer = "computer";
   nextGame();
+}
+
+//This function asks the user if they want to keep playing and, if so, checks who guesses next
+async function nextGame() {
+  console.log("\nDo you want to play again? (Y/N): ")
+  playAgain = await getYesNo();
+  if (playAgain==="y") {
+    nextPlayer === "user" ? userGuesses() : computerGuesses();
+  } else {
+    //assumes no
+    endGame();
+  }
+}
+//Text and data for the end of the game
+function endGame() {
+  let averageComputerGuesses = totalComputerTries / totalComputerWins;
+  let averageUserGuesses = totalUserTries / totalUserWins;
+
+  console.log(`\nNumber of games that I guessed correctly: ${totalComputerWins}`);
+  console.log(`My average number of guesses: ${averageComputerGuesses}`);
+
+  console.log(`\nNumber of games that you guessed correctly: ${totalUserWins}`);
+  console.log(`Your average number of guesses: ${averageUserGuesses || 0}`);
+
+  if (averageComputerGuesses > averageUserGuesses) {
+    console.log("\nYou were better at guessing! Great job!");
+  } else if (averageComputerGuesses < averageUserGuesses) {
+    console.log("\nI was better at guessing this time. Better luck next time.");
+  } else {
+    console.log("\nWe were evenly matched! Well played!");
+  }
+  console.log("\nIt was nice playing with you. Goodbye.");
+  process.exit();
 }
 
 computerGuesses();
