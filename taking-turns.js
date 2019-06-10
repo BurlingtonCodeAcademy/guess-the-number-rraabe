@@ -175,7 +175,11 @@ async function userGuesses() {
   maxNumber = await getNumber();
   
   let secretNumber = randomInteger(minNumber, maxNumber);
-  console.log("My secret number is: " + secretNumber);
+  
+  console.log("Okay I picked a number. Good luck guessing!");
+  //Uncomment to see what the computer is picking for it's number
+  //console.log("My secret number is: " + secretNumber); 
+
   //Start guessing
   let guess = await ask("What's your guess? ");
   
